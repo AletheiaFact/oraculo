@@ -1,0 +1,58 @@
+serve:
+  public:
+    port: 4446
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://localhost:3000
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+      exposed_headers:
+        - Content-Type
+      debug: true
+  admin:
+    port: 4447
+    cors:
+      enabled: true
+      allowed_origins:
+        - http://localhost:3000
+      allowed_methods:
+        - POST
+        - GET
+        - PUT
+        - PATCH
+        - DELETE
+      allowed_headers:
+        - Authorization
+        - Content-Type
+      exposed_headers:
+        - Content-Type
+      debug: true
+
+urls:
+  self:
+    issuer: http://localhost:4446
+  consent: http://localhost:3000/consent
+  login: http://localhost:3000/login
+
+secrets:
+  system:
+    - youReallyNeedToChangeThis
+
+strategies:
+  access_token: opaque
+
+ttl:
+  access_token: 1h
+  refresh_token: 720h
+
+oauth2:
+  client_credentials:
+    default_grant_allowed_scope: true

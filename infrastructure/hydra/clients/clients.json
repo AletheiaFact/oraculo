@@ -1,0 +1,19 @@
+[
+  {
+    "client_id": "my-m2m-client",
+    "client_secret": "super-secure-secret",
+    "client_name": "M2M Service Client",
+    "grant_types": [
+      "client_credentials"
+    ],
+    "response_types"
+      : [
+    
+      "token"
+      
+    
+    ],
+    "scope": "read write",
+    "token_endpoint_auth_method": "client_secret_post"
+  }
+]

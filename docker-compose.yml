@@ -1,0 +1,47 @@
+
+version: '3.7'
+
+services:
+  hydra-migrate:
+    image: oryd/hydra:v2.1
+    environment:
+      - DSN=postgres://hydra:secret@postgres:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+    command: migrate sql -e --yes
+    restart: on-failure
+    depends_on:
+      - postgres
+
+  hydra:
+    image: oryd/hydra:v2.1
+    ports:
+      - "4444:4444" # Public API
+      - "4445:4445" # Admin API
+    depends_on:
+      - hydra-migrate
+    command:
+      serve all --dangerous-force-http
+    environment:
+      - DSN=postgres://hydra:secret@postgres:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+      - SECRETS_SYSTEM=youReallyNeedToChangeThis
+      - URLS_SELF_ISSUER=http://localhost:4444
+      - URLS_CONSENT=http://localhost:3000/consent
+      - URLS_LOGIN=http://localhost:3000/login
+      - SERVE_PUBLIC_CORS_ENABLED=true
+      - SERVE_ADMIN_CORS_ENABLED=true
+      - STRATEGIES_ACCESS_TOKEN=opaque
+      - TTL_ACCESS_TOKEN=1h
+      - TTL_REFRESH_TOKEN=720h
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=hydra
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=hydra
+    volumes:
+      - hydra-postgres:/var/lib/postgresql/data
+
+volumes:
+  hydra-postgres:
