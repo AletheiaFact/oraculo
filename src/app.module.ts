@@ -4,9 +4,16 @@ import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { ClaimModule } from './claim/claim.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, ClaimModule],
+  imports: [
+    AuthModule,
+    ClaimModule,
+    ConfigModule.forRoot({
+      isGlobal: true
+    })
+  ],
   controllers: [AppController],
   providers: [AppService, AuthService],
 })

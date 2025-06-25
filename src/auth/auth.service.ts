@@ -37,13 +37,13 @@ export class AuthService {
   async generateClientCredentialsToken(
     clientId: string,
     clientSecret: string,
-    scope: string,
+    scope: string  = '',
   ) {
     try {
+      const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
       const formData = new URLSearchParams({
         grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
         scope,
       });
 
@@ -51,6 +51,7 @@ export class AuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${basicAuth}`,
         },
         body: formData,
       });
