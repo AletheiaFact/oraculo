@@ -1,9 +1,17 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
   private readonly hydraAdminUrl = 'http://localhost:4445';
   private readonly hydraPublicUrl = 'http://localhost:4444';
+  private cachedToken: string | null = null;
+  private tokenExpiresAt: number = 0;
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+      private readonly configService: ConfigService
+    ) {}
 
   async createOAuth2Client(clientName: string, scopes: string[]) {
     try {
@@ -94,5 +102,31 @@ export class AuthService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+    async getToken(): Promise<string> {
+    if (this.cachedToken && Date.now() < this.tokenExpiresAt) {
+      return this.cachedToken;
+    }
+
+    const scope = this.configService.get<string>('OAUTH_SCOPE') || '';
+    const clientId = this.configService.get<string>("CLIENT_ID");
+    const clientSecret = this.configService.get<string>("CLIENT_SECRET");
+
+    if (!clientId || !clientSecret) {
+      throw new Error("CLIENT_ID or CLIENT_SECRET are not defined in .env");
+    }
+
+    const tokenData = await this.generateClientCredentialsToken(
+      clientId,
+      clientSecret,
+      scope
+    );
+
+    this.cachedToken = tokenData.access_token;
+    this.tokenExpiresAt = Date.now() + tokenData.expires_in * 1000 - 60 * 1000;
+
+    this.logger.log(`Token obtained successfully. Expires in ${tokenData.expires_in}s`);
+    return this.cachedToken;
   }
 }

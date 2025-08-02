@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ClaimService } from './claim.service';
 
-@Controller('api/claim')
+@Controller('external-api/claim')
 export class ClaimController {
   constructor(private readonly claimService: ClaimService) { }
 
